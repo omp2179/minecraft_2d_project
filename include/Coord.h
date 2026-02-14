@@ -4,8 +4,8 @@
 #include <iostream>
 
 struct Coord {
-  int x;
-  int y;
+  int x=0;
+  int y=0;
 
   bool operator==(const Coord &other) const {
     return x == other.x && y == other.y;
