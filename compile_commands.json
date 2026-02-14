@@ -1,0 +1,7 @@
+[
+  {
+    "directory": "d:/minecraft_2d_project",
+    "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -std=c++23 -Wall -Wextra -Iinclude -c src/main.cpp",
+    "file": "src/main.cpp"
+  }
+]
