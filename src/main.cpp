@@ -1,6 +1,8 @@
 #include "BlockType.h"
+#include "Chunk.h"
 #include "Coord.h"
 #include "Pixel.h"
+#include "World.h"
 #include <cassert>
 #include <iostream>
 #include <unordered_map>
@@ -174,6 +176,85 @@ void test_integration() {
   cout << "Integration test PASSED!\n";
 }
 
+void test_chunk() {
+  cout << "\n=== CHUNK TESTS ===\n";
+
+  // 1. Create a chunk at position (0, 0)
+  Chunk chunk({0, 0});
+  print_chunk(chunk);
+
+  // 2. Verify terrain layers
+  assert(chunk.get_block(5, 0) == BlockType::AIR);
+  assert(chunk.get_block(5, 3) == BlockType::GRASS);
+  assert(chunk.get_block(5, 5) == BlockType::DIRT);
+  assert(chunk.get_block(5, 7) == BlockType::STONE);
+  assert(chunk.get_block(5, 9) == BlockType::BEDROCK);
+  cout << "Terrain layers: correct\n";
+
+  // 3. Out-of-bounds returns AIR
+  assert(chunk.get_block(-1, 0) == BlockType::AIR);
+  assert(chunk.get_block(99, 99) == BlockType::AIR);
+  cout << "Out-of-bounds safety: correct\n";
+
+  // 4. Mining! Change a stone to air
+  chunk.set_block(5, 7, BlockType::AIR);
+  assert(chunk.get_block(5, 7) == BlockType::AIR);
+  cout << "Mining (set_block): correct\n";
+
+  // 5. Building! Place diamond where air was
+  chunk.set_block(5, 1, BlockType::DIAMOND);
+  assert(chunk.get_block(5, 1) == BlockType::DIAMOND);
+  cout << "Building (set_block): correct\n";
+
+  // 6. Print modified chunk
+  cout << "\nAfter mining + building:\n";
+  print_chunk(chunk);
+
+  cout << "All Chunk tests PASSED!\n";
+}
+
+void test_world() {
+  cout << "\n=== WORLD TESTS ===\n";
+
+  World world;
+
+  // 1. World starts empty
+  assert(world.chunk_count() == 0);
+  cout << "Empty world: 0 chunks\n";
+
+  // 2. Access a block — chunk auto-created (lazy loading!)
+  BlockType b = world.get_block(25, 7);
+  cout << "Block at (25, 7): " << block_to_string(b) << "\n";
+  assert(world.chunk_count() == 1);
+  cout << "After first access: " << world.chunk_count() << " chunk loaded\n";
+
+  // 3. Access same chunk — no new chunk created
+  world.get_block(20, 3); // still in chunk (2, 0)
+  assert(world.chunk_count() == 1);
+  cout << "Same chunk access: still " << world.chunk_count() << " chunk\n";
+
+  // 4. Access different chunk — new chunk auto-created
+  world.get_block(35, 7); // chunk (3, 0)
+  assert(world.chunk_count() == 2);
+  cout << "Different chunk: " << world.chunk_count() << " chunks now\n";
+
+  // 5. Negative coordinates work
+  world.get_block(-5, -15);
+  assert(world.chunk_count() == 3);
+  cout << "Negative coords: " << world.chunk_count() << " chunks\n";
+
+  // 6. Mining in world coordinates
+  world.set_block(25, 7, BlockType::AIR);
+  assert(world.get_block(25, 7) == BlockType::AIR);
+  cout << "Mining at (25,7): correct\n";
+
+  // 7. Print a slice of the world (3 chunks wide)
+  cout << "\nWorld view (x: 0-29, y: 0-9):\n";
+  print_world(world, 0, 29, 0, 9);
+
+  cout << "All World tests PASSED!\n";
+}
+
 int main() {
 #ifdef _WIN32
   enable_virtual_terminal();
@@ -183,6 +264,8 @@ int main() {
   test_blocktype();
   test_pixel();
   test_integration();
+  test_chunk();
+  test_world();
 
   return 0;
 }
