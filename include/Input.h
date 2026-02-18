@@ -1,7 +1,6 @@
 #pragma once
 #include <conio.h>
 
-// All keys pressed in a single frame — allows simultaneous actions
 struct InputState {
   bool move_left = false;
   bool move_right = false;
@@ -12,6 +11,7 @@ struct InputState {
   bool mine_down = false;
   bool place_block = false;
   bool quit = false;
+  int select_block = 0;
 };
 
 inline InputState get_input() {
@@ -57,6 +57,24 @@ inline InputState get_input() {
       case 'q':
       case 'Q':
         state.quit = true;
+        break;
+      case '1':
+        state.select_block = 1;
+        break;
+      case '2':
+        state.select_block = 2;
+        break;
+      case '3':
+        state.select_block = 3;
+        break;
+      case '4':
+        state.select_block = 4;
+        break;
+      case '5':
+        state.select_block = 5;
+        break;
+      case '6':
+        state.select_block = 6;
         break;
       }
     }

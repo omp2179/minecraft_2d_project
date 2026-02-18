@@ -538,6 +538,7 @@ int main() {
           world.get_block(player_x, player_y - 1) == BlockType::AIR;
       if (on_ground && above_clear) {
         player_y--; // hop up 1 block
+        fall_timer = 0;
       }
     }
 
@@ -561,8 +562,8 @@ int main() {
       if (target != BlockType::AIR && target != BlockType::BEDROCK) {
         world.set_block(player_x, player_y - 1, BlockType::AIR);
         inventory[static_cast<int>(target)]++;
-        player_y--;       // auto-climb into the mined space
-        fall_timer = 0;   // reset gravity — gives time to mine sideways
+        player_y--;     // auto-climb into the mined space
+        fall_timer = 0; // reset gravity — gives time to mine sideways
       }
     }
     if (input.mine_down) {
@@ -575,8 +576,18 @@ int main() {
 
     // --- 5. BUILDING ---
     if (input.place_block) {
-      int place_x = player_x + facing;
-      int place_y = player_y;
+      int place_x, place_y;
+
+      bool on_ground = world.get_block(player_x, player_y) != BlockType::AIR;
+
+      if (on_ground) {
+        place_x = player_x + facing;
+        place_y = player_y;
+      } else {
+        place_x = player_x;
+        place_y = player_y + 1;
+      }
+
       if (world.get_block(place_x, place_y) == BlockType::AIR) {
         BlockType block_toplace = static_cast<BlockType>(selected_block);
         if (inventory[selected_block] > 0) {
@@ -584,6 +595,10 @@ int main() {
           inventory[selected_block]--;
         }
       }
+    }
+
+    if (input.select_block != 0) {
+      selected_block = input.select_block;
     }
 
     // --- 2. HORIZONTAL COLLISION ---
@@ -627,13 +642,21 @@ int main() {
                      {'$', Color::BRIGHT_CYAN});
 
     string hud = "Pos: (" + to_string(player_x) + "," + to_string(player_y) +
-                 ")  [WASD+W]Move  [Arrows]Mine  [Space]Place  [Q]Quit";
-    string inv_hud = "Inv: Grass:" + to_string(inventory[1]) +
-                     " Dirt:" + to_string(inventory[2]) +
-                     " Stone:" + to_string(inventory[3]) +
-                     " Iron:" + to_string(inventory[4]) +
-                     " Gold:" + to_string(inventory[5]) +
-                     " Dia:" + to_string(inventory[6]);
+                 ")  [WASD+W]Move  [Arrows]Mine [1-6]Select Inventory Block "
+                 "[Space]Place  [Q]Quit";
+    string inv_hud = "Inv:";
+    inv_hud += (selected_block == 1 ? " >" : "  ");
+    inv_hud += "Grass:" + to_string(inventory[1]);
+    inv_hud += (selected_block == 2 ? " >" : "  ");
+    inv_hud += "Dirt:" + to_string(inventory[2]);
+    inv_hud += (selected_block == 3 ? " >" : "  ");
+    inv_hud += "Stone:" + to_string(inventory[3]);
+    inv_hud += (selected_block == 4 ? " >" : "  ");
+    inv_hud += "Iron:" + to_string(inventory[4]);
+    inv_hud += (selected_block == 5 ? " >" : "  ");
+    inv_hud += "Gold:" + to_string(inventory[5]);
+    inv_hud += (selected_block == 6 ? " >" : "  ");
+    inv_hud += "Dia:" + to_string(inventory[6]);
 
     screen.draw_text(0, 0, hud, Color::MAGENTA);
     screen.draw_text(0, 1, inv_hud, Color::YELLOW);
