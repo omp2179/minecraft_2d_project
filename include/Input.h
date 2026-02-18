@@ -12,6 +12,8 @@ struct InputState {
   bool place_block = false;
   bool quit = false;
   int select_block = 0;
+  bool open_inventory = false;
+  bool confirm_inventory = false;
 };
 
 inline InputState get_input() {
@@ -24,6 +26,7 @@ inline InputState get_input() {
       int arrow = _getch();
 
       switch (arrow) {
+
       case 75:
         state.mine_left = true;
         break;
@@ -39,6 +42,9 @@ inline InputState get_input() {
       }
     } else {
       switch (key) {
+      case 13:
+        state.confirm_inventory = true;
+        break;
       case 'a':
       case 'A':
         state.move_left = true;
@@ -57,6 +63,10 @@ inline InputState get_input() {
       case 'q':
       case 'Q':
         state.quit = true;
+        break;
+      case 'e':
+      case 'E':
+        state.open_inventory = true;
         break;
       case '1':
         state.select_block = 1;

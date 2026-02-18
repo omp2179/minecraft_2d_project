@@ -510,12 +510,62 @@ int main() {
   const int GRAVITY_INTERVAL = 5; // fall 1 block every 5 frames
 
   bool running = true;
+  bool inventory_open = false;
+  int inventory_cursor = 0;
+
   while (running) {
     InputState input = get_input();
 
     // --- 1. QUIT ---
     if (input.quit) {
       running = false;
+      continue;
+    }
+
+    if (input.open_inventory) {
+      inventory_open = !inventory_open;
+    }
+    if (inventory_open) {
+      if (input.mine_up) {
+        inventory_cursor--;
+      }
+      if (input.mine_down) {
+        inventory_cursor++;
+      }
+
+      if (inventory_cursor < 0) {
+        inventory_cursor = 0;
+      }
+      if (inventory_cursor > 5) {
+        inventory_cursor = 5;
+      }
+
+      screen.clear();
+
+      screen.draw_text(25, 3, "===INVENTORY===", Color::BRIGHT_BLUE);
+
+      string names[] = {"Grass", "Dirt", "Stone", "Iron", "Gold", "Diamond"};
+
+      for (int i = 0; i < 6; ++i) {
+        string prefix = (inventory_cursor == i) ? " >> " : "  ";
+        string line = prefix + "[" + to_string(i + 1) + "]" + names[i] +
+                      "..... " + to_string(inventory[i + 1]);
+
+        Color c =
+            (inventory_cursor == i) ? Color::BRIGHT_GREEN : Color::BRIGHT_WHITE;
+        screen.draw_text(20, 6 + i, line, c);
+      }
+
+      screen.draw_text(20, 14, "[Up/Down] Navigate [Enter] Select [E] Close",
+                       Color::GRAY);
+
+      if (input.confirm_inventory) {
+        inventory_open = false;
+        selected_block = inventory_cursor + 1;
+      }
+
+      screen.render();
+      Sleep(50);
       continue;
     }
 
